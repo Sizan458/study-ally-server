@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import 'dotenv/config'
-import { MongoClient, ServerApiVersion } from 'mongodb'
+import { MongoClient, ObjectId, ServerApiVersion } from 'mongodb'
 const app = express();
 const port =process.env.PORT ||5001;
 //middleware
@@ -33,6 +33,15 @@ app .post ("/all-assignments", async(req, res) =>{
     const result = await  All_ASSIGNMENT.insertOne(assignments);
     res.send(result);
 })
+// see data by id
+app.get ("/all-assignments/:id", async(req, res) =>{
+    const id =req.params.id;
+    const query ={_id: new ObjectId(id)}
+    const result = await All_ASSIGNMENT.findOne(query);
+   
+    res.send(result);
+  })
+  
     await client.connect();
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
