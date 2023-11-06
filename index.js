@@ -26,28 +26,34 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
      //create a database
-     const All_ASSIGNMENT =client.db('Study-ally ').collection("all-assignments");
+     const AllASSIGNMENT =client.db("Study-ally").collection("all-assignments")
 //insert data into database
 app .post ("/all-assignments", async(req, res) =>{
     const assignments = req.body;
-    const result = await  All_ASSIGNMENT.insertOne(assignments);
+    const result = await  AllASSIGNMENT.insertOne(assignments);
     res.send(result);
 })
+//show all data in sever site
+app.get ("/all-assignments", async(req, res) =>{
+  const result = await  AllASSIGNMENT .find().toArray();
+  res.send(result);
+  
+}) 
 // see data by id
 app.get ("/all-assignments/:id", async(req, res) =>{
     const id =req.params.id;
     const query ={_id: new ObjectId(id)}
-    const result = await All_ASSIGNMENT.findOne(query);
+    const result = await AllASSIGNMENT.findOne(query);
    
     res.send(result);
   })
   //delete the data  by id
-  app.delete( "/all-assignment/:id", async (req, res) =>{
+  app.delete( "all-assignments/:id", async (req, res) =>{
     const id = req.params.id;
     const query = {
       _id:new ObjectId(id),
     };
-    const result = await All_ASSIGNMENT.deleteOne(query);
+    const result = await AllASSIGNMENT.deleteOne(query);
     res.send(result);
   });
 
