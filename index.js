@@ -41,6 +41,16 @@ app.get ("/all-assignments/:id", async(req, res) =>{
    
     res.send(result);
   })
+  //delete the data  by id
+  app.delete( "/all-assignment/:id", async (req, res) =>{
+    const id = req.params.id;
+    const query = {
+      _id:new ObjectId(id),
+    };
+    const result = await All_ASSIGNMENT.deleteOne(query);
+    res.send(result);
+  });
+
   
     await client.connect();
     // Send a ping to confirm a successful connection
