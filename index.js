@@ -27,6 +27,12 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
      //create a database
      const All_ASSIGNMENT =client.db('Study-ally ').collection("all-assignments");
+//insert data into database
+app .post ("/all-assignments", async(req, res) =>{
+    const assignments = req.body;
+    const result = await  All_ASSIGNMENT.insertOne(assignments);
+    res.send(result);
+})
     await client.connect();
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
