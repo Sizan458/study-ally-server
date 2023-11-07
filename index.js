@@ -64,7 +64,7 @@ app.get ("/all-assignments/:id", async(req, res) =>{
     res.send(result);
   })
   //delete the data  by id
-  app.delete( "all-assignments/:id", async (req, res) =>{
+  app.delete( "/all-assignments/:id", async (req, res) =>{
     const id = req.params.id;
     const query = {
       _id:new ObjectId(id),
@@ -72,6 +72,31 @@ app.get ("/all-assignments/:id", async(req, res) =>{
     const result = await AllASSIGNMENT.deleteOne(query);
     res.send(result);
   });
+  //update data by id
+  app.put("/all-assignments/:id",async(req, res)=>{
+    const id = req.params.id;
+    const data= req.body;
+    const filter = {_id : new ObjectId(id)};
+    const option = { upsert: true };
+    const update = {
+      $set: {
+     email : data.email,
+     tittle: data.tittle,
+     date: data.date,
+     level: data.level,
+     mark : data.mark,
+     description : data.description,
+     pdf: data.pdf,
+     img: data.img,
+      },
+    };
+    const result = await AllASSIGNMENT.updateOne(
+      filter,
+      update,
+      option
+    );
+    res.send(result);
+  })
 
   
     await client.connect();
@@ -90,4 +115,4 @@ app.get('/', (req, res) => {
     res.send("Welcome to  my server!");
 })
 // exceed the server
-app.listen(port,()=>{console.log(`server is listening on ${port}`)});
+app.listen(port,()=>{console.log(`server is listening on ${port}`)}); 
