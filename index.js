@@ -35,8 +35,24 @@ app .post ("/all-assignments", async(req, res) =>{
 })
 //show all data in sever site
 app.get ("/all-assignments", async(req, res) =>{
-  const result = await  AllASSIGNMENT .find().toArray();
-  res.send(result);
+  //sorting by level
+  let query ={}
+  const level = req.query.level;
+  if(level){
+    query.level = level;
+  }
+  //pagination
+  const page= Number(req.query.page);
+  const limit= Number(req.query.limit);
+  //pagination logic
+  const skip =(page-1)*limit
+  const result = await  AllASSIGNMENT .find(query).skip(skip).limit(limit).toArray();
+  //count data
+  const total = await AllASSIGNMENT.countDocuments()
+  res.send({
+    total,
+    result
+  });
   
 }) 
 // see data by id
