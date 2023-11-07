@@ -1,12 +1,36 @@
 import express from 'express';
 import cors from 'cors';
-import 'dotenv/config'
-import { MongoClient, ObjectId, ServerApiVersion } from 'mongodb'
+import 'dotenv/config';
+import cookieParser from 'cookie-parser';
+import { MongoClient, ObjectId, ServerApiVersion } from 'mongodb';
+import jwt, { decode } from  'jsonwebtoken'
 const app = express();
 const port =process.env.PORT ||5001;
 //middleware
-app.use(cors());
+app.use(cors({
+  origin:['http://localhost:5173'],
+  credentials:true
+}));
 app.use(express.json());
+app.use(cookieParser());
+//token validation middleware
+const verifyToken =async (req, res, next) => {
+const token = req.cookie?.token;
+if(!token){
+  return res.status(401).send({message:"not authorized"})
+}
+jwt.verify(token, process.env.ACCESS_TOKEN_SECRET,(err,decoded)=>{
+  if(err){
+    return res.status(401).send({message:"Forbidden"})
+  }
+  req.user=decoded
+  next()
+})
+
+}
+
+
+
 
 //connect to mongodb
 
@@ -97,7 +121,23 @@ app.get ("/all-assignments/:id", async(req, res) =>{
     );
     res.send(result);
   })
+// access  token api
+ app.post("/access-token", async(req,res)=>{
+   const user = req.body;
 
+   console.log(user);
+   //generate access token
+   const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{expiresIn:"30h"})
+   res
+   //set token to cookie
+   .cookie('jwt',token,{
+    httpOnly:true,
+    secure:false,
+    sameSite:'none',
+   })
+   .send({success:true});
+   
+ })
   
     await client.connect();
     // Send a ping to confirm a successful connection
