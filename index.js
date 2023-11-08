@@ -3,12 +3,15 @@ import cors from 'cors';
 import 'dotenv/config';
 import cookieParser from 'cookie-parser';
 import { MongoClient, ObjectId, ServerApiVersion } from 'mongodb';
-import jwt, { decode } from  'jsonwebtoken'
+import jwt from  'jsonwebtoken'
 const app = express();
 const port =process.env.PORT ||5001;
 //middleware
 app.use(cors({
-  origin:['http://localhost:5173'],
+  origin:[
+    "https://study-ally-11673.web.app", 
+    "https://study-ally-11673.firebaseapp.com"
+  ],
   credentials:true
 }));
 app.use(express.json());
@@ -51,6 +54,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
      //create a database
      const AllASSIGNMENT =client.db("Study-ally").collection("all-assignments")
+     const AllLevel =client.db("Study-ally").collection("all-level")
 //insert data into database
 app .post ("/all-assignments", async(req, res) =>{
     const assignments = req.body;
@@ -99,28 +103,43 @@ app.get ("/all-assignments/:id", async(req, res) =>{
   //update data by id
   app.put("/all-assignments/:id",async(req, res)=>{
     const id = req.params.id;
-    const data= req.body;
-    const filter = {_id : new ObjectId(id)};
-    const option = { upsert: true };
-    const update = {
-      $set: {
-     email : data.email,
-     tittle: data.tittle,
-     date: data.date,
-     level: data.level,
-     mark : data.mark,
-     description : data.description,
-     pdf: data.pdf,
-     img: data.img,
-      },
-    };
-    const result = await AllASSIGNMENT.updateOne(
-      filter,
-      update,
-      option
-    );
-    res.send(result);
+      const data = req.body;
+      console.log("id", id, data);
+      const filter = { _id: new ObjectId (id) };
+      const options = { upsert: true };
+      const updatedUSer = {
+        $set: {
+       email :data.email,
+    tittle :data.tittle,
+     date  : data.date,
+    level :  data.level,
+     mark :  data.mark,
+ description : data.description,
+   pdf  : data.pdf,
+  url : data.url,
+        },
+      };
+      const result = await AllASSIGNMENT.updateOne(
+        filter,
+        updatedUSer,
+        options
+      );
+      res.send(result);
   })
+  //level api
+  //insert a new  data
+  app.post("/all-level", async (req, res) => {
+    const level = req.body;
+  
+    const result = await AllLevel.insertOne(level);
+    
+    res.send(result);
+  });
+  //read all levels
+  app.get("/all-level", async (req, res) => {
+    const result = await AllLevel.find().toArray();
+    res.send(result);
+  });
 // access  token api
  app.post("/access-token", async(req,res)=>{
    const user = req.body;
