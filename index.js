@@ -5,14 +5,12 @@ import cookieParser from 'cookie-parser';
 import { MongoClient, ObjectId, ServerApiVersion } from 'mongodb';
 import jwt from  'jsonwebtoken'
 const app = express();
-const port =process.env.PORT ||5001;
+const port =process.env.PORT ||5002;
 //middleware
 app.use(cors({
-  origin:[
-    "https://study-ally-11673.web.app", 
-    "https://study-ally-11673.firebaseapp.com"
-  ],
+  origin:["http://localhost:5173","https://study-ally-11673.web.app","https://study-ally-11673.firebaseapp.com"],
   credentials:true
+
 }));
 app.use(express.json());
 app.use(cookieParser());
@@ -75,6 +73,7 @@ app.get ("/all-assignments", async(req, res) =>{
   //pagination logic
   const skip =(page-1)*limit
   const result = await  AllASSIGNMENT .find(query).skip(skip).limit(limit).toArray();
+  console.log(result);
   //count data
   const total = await AllASSIGNMENT.countDocuments()
   res.send({
