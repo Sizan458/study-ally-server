@@ -7,11 +7,7 @@ import jwt from  'jsonwebtoken'
 const app = express();
 const port =process.env.PORT ||5002;
 //middleware
-app.use(cors({
-  origin:["http://localhost:5173","https://study-ally-11673.web.app","https://study-ally-11673.firebaseapp.com"],
-  credentials:true
-
-}));
+app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 //token validation middleware
@@ -53,6 +49,7 @@ async function run() {
      //create a database
      const AllASSIGNMENT =client.db("Study-ally").collection("all-assignments")
      const AllLevel =client.db("Study-ally").collection("all-level")
+     const MYAssignment =client.db("Study-ally").collection("my-assignment")
 //insert data into database
 app .post ("/all-assignments", async(req, res) =>{
     const assignments = req.body;
@@ -73,7 +70,7 @@ app.get ("/all-assignments", async(req, res) =>{
   //pagination logic
   const skip =(page-1)*limit
   const result = await  AllASSIGNMENT .find(query).skip(skip).limit(limit).toArray();
-  console.log(result);
+  
   //count data
   const total = await AllASSIGNMENT.countDocuments()
   res.send({
@@ -104,7 +101,7 @@ app.get ("/all-assignments/:id", async(req, res) =>{
     const id = req.params.id;
       const data = req.body;
       console.log("id", id, data);
-      const filter = { _id: new ObjectId (id) };
+      const filter = { _id: new ObjectId(id) };
       const options = { upsert: true };
       const updatedUSer = {
         $set: {
@@ -139,6 +136,37 @@ app.get ("/all-assignments/:id", async(req, res) =>{
     const result = await AllLevel.find().toArray();
     res.send(result);
   });
+  //myAssignment api
+  //insert a new  data
+  app.post("/my-assignment", async (req, res) => {
+    const level = req.body;
+  
+    const result = await MYAssignment.insertOne(level);
+    
+    res.send(result);
+  });
+  //read all  data
+  app.get("/my-assignment", async (req, res) => {
+    const result = await MYAssignment.find().toArray();
+    res.send(result);
+  });
+  // see data by id
+app.get ("/my-assignment/:id", async(req, res) =>{
+  const id =req.params.id;
+  const query ={_id: new ObjectId(id)}
+  const result = await MYAssignment.findOne(query);
+ 
+  res.send(result);
+})
+//delete the data  by id
+app.delete( "/my-assignment/:id", async (req, res) =>{
+  const id = req.params.id;
+  const query = {
+    _id:new ObjectId(id),
+  };
+  const result = await MYAssignment.deleteOne(query);
+  res.send(result);
+});
 // access  token api
  app.post("/access-token", async(req,res)=>{
    const user = req.body;
