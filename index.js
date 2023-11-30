@@ -7,12 +7,18 @@ import jwt from  'jsonwebtoken'
 const app = express();
 const port =process.env.PORT ||5002;
 //middleware
-app.use(cors());
+app.use(cors({
+  origin:[
+    "https://study-ally-98f54.web.app","https://study-ally-98f54.firebaseapp.com"
+  ],
+  credentials:true
+}));
 app.use(express.json());
 app.use(cookieParser());
 //token validation middleware
 const verifyToken =async (req, res, next) => {
-const token = req.cookie?.token;
+const token =  req?.cookies?.token
+
 if(!token){
   return res.status(401).send({message:"not authorized"})
 }
@@ -26,9 +32,11 @@ jwt.verify(token, process.env.ACCESS_TOKEN_SECRET,(err,decoded)=>{
 
 }
 
-
-
-
+//logger api
+const logger = (req, res,next)=>{
+    console.log("log: info", req.method,req.url);
+    next()
+}
 //connect to mongodb
 
 
@@ -50,6 +58,7 @@ async function run() {
      const AllASSIGNMENT =client.db("Study-ally").collection("all-assignments")
      const AllLevel =client.db("Study-ally").collection("all-level")
      const MYAssignment =client.db("Study-ally").collection("my-assignment")
+     const User =client.db("Study-ally").collection("user")
 //insert data into database
 app .post ("/all-assignments", async(req, res) =>{
     const assignments = req.body;
@@ -113,6 +122,7 @@ app.get ("/all-assignments/:id", async(req, res) =>{
  description : data.description,
    pdf  : data.pdf,
   url : data.url,
+  
         },
       };
       const result = await AllASSIGNMENT.updateOne(
@@ -146,7 +156,7 @@ app.get ("/all-assignments/:id", async(req, res) =>{
     res.send(result);
   });
   //read all  data
-  app.get("/my-assignment", async (req, res) => {
+  app.get("/my-assignment", logger,verifyToken, async (req, res) => {
     const result = await MYAssignment.find().toArray();
     res.send(result);
   });
@@ -167,18 +177,41 @@ app.delete( "/my-assignment/:id", async (req, res) =>{
   const result = await MYAssignment.deleteOne(query);
   res.send(result);
 });
+//user api
+//insert a new  data
+app.post("/user", async (req, res) => {
+  const users = req.body;
+
+  const result = await User.insertOne(users);
+  
+  res.send(result);
+});
+//read all  data
+app.get("/user", async (req, res) => {
+  const result = await User.find().toArray();
+  res.send(result);
+});
+// see data by id
+app.get ("/User/:id", async(req, res) =>{
+const id =req.params.id;
+const query ={_id: new ObjectId(id)}
+const result = await User.findOne(query);
+
+res.send(result);
+})
+
 // access  token api
  app.post("/access-token", async(req,res)=>{
-   const user = req.body;
+   const users = req.body;
 
-   console.log(user);
+   
    //generate access token
-   const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{expiresIn:"30h"})
+   const token = jwt.sign(users,process.env.ACCESS_TOKEN_SECRET,{expiresIn:"30h"})
    res
    //set token to cookie
-   .cookie('jwt',token,{
+   .cookie('token',token,{
     httpOnly:true,
-    secure:false,
+    secure:true,
     sameSite:'none',
    })
    .send({success:true});
