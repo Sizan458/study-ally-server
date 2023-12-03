@@ -9,7 +9,9 @@ const port =process.env.PORT ||5002;
 //middleware
 app.use(cors({
   origin:[
-    "https://study-ally-98f54.web.app","https://study-ally-98f54.firebaseapp.com"
+    "https://flock-e2437.web.app","https://flock-e2437.firebaseapp.com","https://absurd-cherries.surge.sh"
+    
+
   ],
   credentials:true
 }));
